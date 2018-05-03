@@ -8,7 +8,6 @@ package persistence.demo;
 import java.io.IOException;
 import java.util.Date;
 import firebase.persistence.IFirebasePersistence;
-import file.persistence.Persistence;
 import persistence.admin.Admin;
 import persistence.admin.AdminFactory;
 import persistence.impl.AdminFactoryImpl;
@@ -28,7 +27,7 @@ public class DemoFirebasePut {
 
         IFirebasePersistence firebasestorage = new FirebasePersistence(mo);
 
-        firebasestorage.putInFirebase(586);
+        firebasestorage.putInFirebase("hm3");
 
     }
 

@@ -5,7 +5,6 @@
  */
 package persistence.admin;
 
-import java.util.Date;
 
 /**
  *
@@ -13,4 +12,6 @@ import java.util.Date;
  */
 public interface AdminFactory {
       public Admin newAdmin(String username, String password, String role, String longitude, String latitude);
+
+ 
 }

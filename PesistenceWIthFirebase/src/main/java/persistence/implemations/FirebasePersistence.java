@@ -7,15 +7,21 @@ package persistence.implemations;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.concurrent.CountDownLatch;
 import firebase.persistence.IFirebasePersistence;
+import java.util.ArrayList;
+import java.util.List;
 import persistence.admin.Admin;
+import persistence.admin.AdminFactory;
+import persistence.impl.AdminFactoryImpl;
 
 /**
  *
@@ -28,6 +34,9 @@ public class FirebasePersistence implements IFirebasePersistence {
     public FirebasePersistence(Admin admins) {
 
         admin = admins;
+    }
+
+    public FirebasePersistence() {
     }
 
     public FirebaseDatabase firebaseDatabase;
@@ -49,16 +58,15 @@ public class FirebasePersistence implements IFirebasePersistence {
     }
 
     @Override
-    public void putInFirebase(long id) {
-        String name = "user" + id;
-        if (id != 0) {
+    public void putInFirebase(String username) {
+        if (username != null) {
 
             initFirebase();
             CountDownLatch countDownLatch = new CountDownLatch(1);
 
             DatabaseReference databaseReference = firebaseDatabase.getReference("/");
 
-            DatabaseReference childReference = databaseReference.child("users").child(name);
+            DatabaseReference childReference = databaseReference.child("users").child(username);
 
             childReference.setValue(admin, new DatabaseReference.CompletionListener() {
 
@@ -79,12 +87,54 @@ public class FirebasePersistence implements IFirebasePersistence {
     }
 
     @Override
-    public String getFromFirebase(long id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String getFromFirebase(String username) {
+        initFirebase();
+       
+        List<Admin> universityList = new ArrayList<>();
+        DatabaseReference databaseReference = firebaseDatabase.getReference("/");
+        DatabaseReference childReference = databaseReference.child("users").child("hm1");
+        childReference.getRef().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot ds) {      System.out.println("testssss");
+                for (DataSnapshot postSnapshot : ds.getChildren()) {
+                   
+                    
+                    
+                    Admin university = postSnapshot.getValue(Admin.class);
+                    AdminFactory factory = AdminFactoryImpl.getInstance();
+              
+                    
+                    
+                    universityList.add(factory.newAdmin( 
+                            postSnapshot.child("username").getValue().toString(),
+                            postSnapshot.child("latitude").getValue().toString(),
+                            postSnapshot.child("longitude").getValue().toString(),
+                            postSnapshot.child("role").getValue().toString(),
+                            postSnapshot.child("title").getValue().toString()
+               
+                    
+                    
+                    )); 
+                    // here you can access to name property like university.name
+                }
+                System.out.println(universityList.toString()+"gdegg"); 
+            }
+    
+
+            @Override
+            public void onCancelled(DatabaseError de) {
+              System.out.println("The read failed: " + de.getMessage());
+
+            }
+        });
+String cool = "cool";
+        return cool;
+
     }
+
 }
 
-   /*private static class DataFirebasePersist implements DataPersist {
+/*private static class DataFirebasePersist implements DataPersist {
 
         @Override
         public void onComplete(DatabaseError de, DatabaseReference dr) {

@@ -7,6 +7,7 @@ package firebase.persistence;
 
 import persistence.admin.Admin;
 
+
 /**
  *
  * @author MoK
@@ -15,7 +16,7 @@ public interface IFirebasePersistence {
 
     public void initFirebase();// call the firebase
 
-    public void putInFirebase(long id);//add data to the firebase
+    public void putInFirebase(String username);//add data to the firebase
 
-    public String getFromFirebase(long id);// get data from firebase with id
+    public String getFromFirebase(String username);// get data from firebase with id
 }

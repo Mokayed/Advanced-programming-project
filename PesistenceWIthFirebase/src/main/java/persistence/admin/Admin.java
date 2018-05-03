@@ -5,7 +5,6 @@
  */
 package persistence.admin;
 
-import java.util.Date;
 
 /**
  *
