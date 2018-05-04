@@ -36,9 +36,9 @@ public class FirebasePersistence implements IFirebasePersistence {
 
         admin = admininfo;
     }
-      public FirebasePersistence() {
-    }
 
+    public FirebasePersistence() {
+    }
 
     public FirebaseDatabase firebaseDatabase;
 
@@ -63,7 +63,7 @@ public class FirebasePersistence implements IFirebasePersistence {
         if (username != null) {
 
             initFirebase();
-            CountDownLatch countDownLatch = new CountDownLatch(1);
+            CountDownLatch countDownLatch = new CountDownLatch(1);// thread call
 
             DatabaseReference databaseReference = firebaseDatabase.getReference("/");
 
@@ -87,23 +87,21 @@ public class FirebasePersistence implements IFirebasePersistence {
         }
     }
 
-  
     @Override
     public void getFromFirebase(String username) {
         initFirebase();
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference childReference = database.getReference("users").child(username);
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        Semaphore semaphore = new Semaphore(0);
+        CountDownLatch countDownLatch = new CountDownLatch(1);//thread call
         childReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot ds) {
 
-                countDownLatch.countDown();
+                
                 AdminInformation adminInfo = ds.getValue(AdminInformation.class);
 
                 System.out.println(adminInfo.toString());
-                semaphore.release();
+                countDownLatch.countDown();
 
             }
 
@@ -115,7 +113,7 @@ public class FirebasePersistence implements IFirebasePersistence {
         });
 
         try {
-            semaphore.acquire();
+              countDownLatch.await();
 
         } catch (InterruptedException ex) {
             Logger.getLogger(FirebasePersistence.class.getName()).log(Level.SEVERE, null, ex);
