@@ -8,9 +8,8 @@ package persistence.demo;
 import java.io.IOException;
 import java.util.Date;
 import firebase.persistence.IFirebasePersistence;
-import persistence.admin.Admin;
-import persistence.admin.AdminFactory;
-import persistence.impl.AdminFactoryImpl;
+import persistence.implemations.AdminInformation;
+
 
 import persistence.implemations.FirebasePersistence;
 
@@ -21,12 +20,11 @@ import persistence.implemations.FirebasePersistence;
 public class DemoFirebasePut {
 
     public static void main(String[] args) throws IOException {
-//adding user Mo Kayed into firebase by userid4.
-        AdminFactory factory = AdminFactoryImpl.getInstance();
-        Admin mo = factory.newAdmin("Mo", "123","admin","0","0");
 
-        IFirebasePersistence firebasestorage = new FirebasePersistence(mo);
+       
+AdminInformation mo = new AdminInformation("helsingør 3000", 0, 0, "mo123", "admin", "mo", "cool mo");
 
+    IFirebasePersistence firebasestorage = new FirebasePersistence(mo);
         firebasestorage.putInFirebase("hm3");
 
     }

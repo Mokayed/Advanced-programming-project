@@ -19,9 +19,9 @@ import java.util.concurrent.CountDownLatch;
 import firebase.persistence.IFirebasePersistence;
 import java.util.ArrayList;
 import java.util.List;
-import persistence.admin.Admin;
-import persistence.admin.AdminFactory;
-import persistence.impl.AdminFactoryImpl;
+import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -29,15 +29,16 @@ import persistence.impl.AdminFactoryImpl;
  */
 public class FirebasePersistence implements IFirebasePersistence {
 
-    private Admin admin;
+    private AdminInformation admin;
+    ArrayList<AdminInformation> adminlist = new ArrayList<>();
 
-    public FirebasePersistence(Admin admins) {
+    public FirebasePersistence(AdminInformation admininfo) {
 
-        admin = admins;
+        admin = admininfo;
+    }
+      public FirebasePersistence() {
     }
 
-    public FirebasePersistence() {
-    }
 
     public FirebaseDatabase firebaseDatabase;
 
@@ -86,74 +87,40 @@ public class FirebasePersistence implements IFirebasePersistence {
         }
     }
 
+  
     @Override
-    public String getFromFirebase(String username) {
+    public void getFromFirebase(String username) {
         initFirebase();
-       
-        List<Admin> universityList = new ArrayList<>();
-        DatabaseReference databaseReference = firebaseDatabase.getReference("/");
-        DatabaseReference childReference = databaseReference.child("users").child("hm1");
-        childReference.getRef().addValueEventListener(new ValueEventListener() {
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference childReference = database.getReference("users").child(username);
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        Semaphore semaphore = new Semaphore(0);
+        childReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot ds) {      System.out.println("testssss");
-                for (DataSnapshot postSnapshot : ds.getChildren()) {
-                   
-                    
-                    
-                    Admin university = postSnapshot.getValue(Admin.class);
-                    AdminFactory factory = AdminFactoryImpl.getInstance();
-              
-                    
-                    
-                    universityList.add(factory.newAdmin( 
-                            postSnapshot.child("username").getValue().toString(),
-                            postSnapshot.child("latitude").getValue().toString(),
-                            postSnapshot.child("longitude").getValue().toString(),
-                            postSnapshot.child("role").getValue().toString(),
-                            postSnapshot.child("title").getValue().toString()
-               
-                    
-                    
-                    )); 
-                    // here you can access to name property like university.name
-                }
-                System.out.println(universityList.toString()+"gdegg"); 
+            public void onDataChange(DataSnapshot ds) {
+
+                countDownLatch.countDown();
+                AdminInformation adminInfo = ds.getValue(AdminInformation.class);
+
+                System.out.println(adminInfo.toString());
+                semaphore.release();
+
             }
-    
 
             @Override
             public void onCancelled(DatabaseError de) {
-              System.out.println("The read failed: " + de.getMessage());
+                System.out.println("The read failed: " + de.getCode());
 
             }
         });
-String cool = "cool";
-        return cool;
+
+        try {
+            semaphore.acquire();
+
+        } catch (InterruptedException ex) {
+            Logger.getLogger(FirebasePersistence.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }
 
 }
-
-/*private static class DataFirebasePersist implements DataPersist {
-
-        @Override
-        public void onComplete(DatabaseError de, DatabaseReference dr) {
-            CountDownLatch countDownLatch = new CountDownLatch(1);
-            System.out.println("Record saved!");
-
-            countDownLatch.countDown();
-
-            try {
-                //wait for firebase to saves record.
-                countDownLatch.await();
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        @Override
-        public void close() throws IOException {
-            out.close();
-        }
-    }
-}*/
