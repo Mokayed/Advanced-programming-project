@@ -5,8 +5,7 @@
  */
 package firebase.persistence;
 
-
-
+import persistence.examples.info.AdminInformation;
 
 /**
  *
@@ -14,9 +13,7 @@ package firebase.persistence;
  */
 public interface IFirebasePersistence {
 
-    public void initFirebase();// call the firebase
+    public void putInFirebase(String username, AdminInformation admin);//add data to the firebase
 
-    public void putInFirebase(String username);//add data to the firebase
-
-    public void getFromFirebase(String username);// get data from firebase with id
+    public AdminInformation getFromFirebase(String username);// get data from firebase with id
 }

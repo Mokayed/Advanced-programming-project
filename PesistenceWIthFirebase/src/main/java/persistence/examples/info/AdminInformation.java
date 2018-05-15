@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package persistence.implemations;
+package persistence.examples.info;
 
 /**
  *
@@ -36,57 +36,40 @@ public class AdminInformation {
         return address;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+
 
     public long getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(long latitude) {
-        this.latitude = latitude;
-    }
 
     public long getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(long longitude) {
-        this.longitude = longitude;
-    }
+
 
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+  
 
     public String getRole() {
         return role;
     }
 
-    public void setRole(String role) {
-        this.role = role;
-    }
 
     public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
     @Override
     public String toString() {

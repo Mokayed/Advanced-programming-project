@@ -5,13 +5,16 @@
  */
 package persistence.implemations;
 
+import persistence.examples.info.AdminInformation;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.DatabaseReference.CompletionListener;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import firebase.persistence.IFirebaseConection;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -29,55 +32,24 @@ import java.util.logging.Logger;
  */
 public class FirebasePersistence implements IFirebasePersistence {
 
-    private AdminInformation admin;
-    ArrayList<AdminInformation> adminlist = new ArrayList<>();
-
-    public FirebasePersistence(AdminInformation admininfo) {
-
-        admin = admininfo;
-    }
+    CountDownLatch countDownLatch = new CountDownLatch(1);//thread call
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
 
     public FirebasePersistence() {
+
     }
 
-    public FirebaseDatabase firebaseDatabase;
-
+// (implementation of IFirebasePersistnce interface)puting data in the firebase using the put frim the Ifirebasepersistence
+    //+ the inner class CompletionListenerImp
     @Override
-    public void initFirebase() {
-        try {
-
-            FirebaseOptions firebaseOptions = new FirebaseOptions.Builder()
-                    .setDatabaseUrl("https://finaleapp-dcad7.firebaseio.com")
-                    .setServiceAccount(new FileInputStream(new File("C:\\Users\\MoK\\Documents\\NetBeansProjects\\Firebase\\finaleapp-dcad7-firebase-adminsdk-ultqu-62bc411e68.json")))
-                    .build();
-
-            FirebaseApp.initializeApp(firebaseOptions);
-            firebaseDatabase = FirebaseDatabase.getInstance();
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    @Override
-    public void putInFirebase(String username) {
+    public void putInFirebase(String username, AdminInformation admin) {
         if (username != null) {
 
-            initFirebase();
-            CountDownLatch countDownLatch = new CountDownLatch(1);// thread call
-
-            DatabaseReference databaseReference = firebaseDatabase.getReference("/");
+            DatabaseReference databaseReference = database.getInstance().getReference("/");
 
             DatabaseReference childReference = databaseReference.child("users").child(username);
-
-            childReference.setValue(admin, new DatabaseReference.CompletionListener() {
-
-                @Override
-                public void onComplete(DatabaseError de, DatabaseReference dr) {
-                    System.out.println("Record saved!");
-                    // decrement countDownLatch value and application will be continues its execution.
-                    countDownLatch.countDown();
-                }
-            });
+            CompletionListenerImpl Complistner = new CompletionListenerImpl();
+            childReference.setValue(admin, Complistner);
             try {
                 //wait for firebase to saves record.
                 countDownLatch.await();
@@ -87,38 +59,64 @@ public class FirebasePersistence implements IFirebasePersistence {
         }
     }
 
+//(implementation of IFirebasePersistnce interface) geting data from firebase using the get from the ifirebase interface 
+//+ the inner class valuelistenermip
     @Override
-    public void getFromFirebase(String username) {
-        initFirebase();
-        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+    public AdminInformation getFromFirebase(String username) {
+
         DatabaseReference childReference = database.getReference("users").child(username);
-        CountDownLatch countDownLatch = new CountDownLatch(1);//thread call
-        childReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot ds) {
 
-                
-                AdminInformation adminInfo = ds.getValue(AdminInformation.class);
-
-                System.out.println(adminInfo.toString());
-                countDownLatch.countDown();
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError de) {
-                System.out.println("The read failed: " + de.getCode());
-
-            }
-        });
-
+        ValueEListnerImpl listener = new ValueEListnerImpl();
+        childReference.addValueEventListener(listener);
         try {
-              countDownLatch.await();
-
+            countDownLatch.await();
         } catch (InterruptedException ex) {
             Logger.getLogger(FirebasePersistence.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        AdminInformation admin = listener.getAdmin();
+
+        return admin;
+
+    }
+
+    private class ValueEListnerImpl implements ValueEventListener {
+
+        private AdminInformation adminInfo;
+
+        public ValueEListnerImpl() {
+        }
+
+        @Override
+        public void onDataChange(DataSnapshot ds) {
+            adminInfo = ds.getValue(AdminInformation.class);
+            System.out.println(adminInfo.toString());
+            countDownLatch.countDown();
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError de) {
+            System.out.println("The read failed: " + de.getCode());
+        }
+
+        private AdminInformation getAdmin() {
+            return adminInfo;
+        }
+
+    }
+
+    private class CompletionListenerImpl implements CompletionListener {
+
+        public CompletionListenerImpl() {
+        }
+
+        @Override
+        public void onComplete(DatabaseError de, DatabaseReference dr) {
+            System.out.println("Record saved!");
+            // decrement countDownLatch value and application will be continues its execution.
+            countDownLatch.countDown();
+        }
     }
 
 }

@@ -6,34 +6,28 @@
 package persistence.demo;
 
 import firebase.persistence.IFirebaseConection;
-import java.io.IOException;
-import java.util.Date;
 import firebase.persistence.IFirebasePersistence;
-import persistence.examples.info.AdminInformation;
+import java.io.IOException;
 import persistence.implemations.FirebaseConectionImp;
-
-
 import persistence.implemations.FirebasePersistence;
 
 /**
  *
  * @author MoK
  */
-public class DemoFirebasePut {
+public class DemoFirebaseGet {
 
     public static void main(String[] args) throws IOException {
-String link = "https://finaleapp-dcad7.firebaseio.com";
+        
+        //calling for the firebase connection and the json file that we get from the firebase
+        String link = "https://finaleapp-dcad7.firebaseio.com";
 String path = "C:\\\\Users\\\\MoK\\\\Documents\\\\NetBeansProjects\\\\Firebase\\\\finaleapp-dcad7-firebase-adminsdk-ultqu-62bc411e68.json";
-       
        IFirebaseConection IFC = new FirebaseConectionImp();
       IFC.initFirebase(link,path);
         
-      
-      
-      AdminInformation mo = new AdminInformation("helsingør 3000", 0, 0, "mo123", "admin", "mo", "cool mo");
-    IFirebasePersistence firebasestorage = new FirebasePersistence();
-        firebasestorage.putInFirebase("hm3",mo);
+      //calling the method from firebasepersistence using the ifriebasepersistence and calling the child by the childname.
+        IFirebasePersistence firebase = new FirebasePersistence();
+        firebase.getFromFirebase("hm1");
 
     }
-
 }
